@@ -18,6 +18,7 @@ class CreateScoresTable extends Migration
             $table->foreignIdFor(\App\Models\User::class)->constrained();
             $table->integer('score');
             $table->timestamps();
+            $table->index(['score']);
         });
     }
 
