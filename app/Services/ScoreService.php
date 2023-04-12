@@ -2,35 +2,43 @@
 
 namespace App\Services;
 
-use App\Repositories\Score\ScoreRepository;
-use Illuminate\Support\Facades\Cache;
+use Redis;
+use RedisException;
 
 class ScoreService
 {
-    public function __construct(private ScoreRepository $scoreRepository)
+    private Redis $redisClient;
+
+    /**
+     * @throws RedisException
+     */
+    public function __construct()
     {
+        $this->redisClient = new Redis();
+        $this->redisClient->connect('localhost', 6379);
     }
 
-    public function regenerateTopList()
+    /**
+     * @throws RedisException
+     */
+    public function getTopList(): array|\Redis
     {
-        $getFirstHundredScores = $this->scoreRepository->getHighestScore(100);
-        Cache::remember('top_list', 600, function () use ($getFirstHundredScores) {
-            return $getFirstHundredScores->map(function ($score) {
-                return [
-                    'user' => $score->user,
-                    'score' => $score->score,
-                    'created_at' => $score->created_at
-                ];
-            });
-        });
+        return $this->redisClient->zRevRange('leaderboard', 0, 99, array('withscores' => true));
     }
 
-    public function getTopList()
+    /**
+     * @throws RedisException
+     */
+    public function getAround($userId, $number = 5): array|Redis
     {
-        if (!Cache::has('top_list'))
-            $this->regenerateTopList();
-
-        return Cache::get('top_list');
+        $rank = $this->redisClient->zRevRank('leaderboard', $userId);
+        if ($number - $rank > 0) {
+            $min = 0;
+        } else {
+            $min = $rank - $number;
+        }
+        return $this->redisClient->zRevRange('leaderboard',$min , $rank + $number,
+            array('withscores' => true));
     }
 
 }
