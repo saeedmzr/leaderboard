@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Jobs\StoreScoreJob;
 use App\Models\Score;
+use App\Models\User;
+use App\Repositories\Score\ScoreRepository;
 use Illuminate\Database\Seeder;
 
 class ScoreSeeder extends Seeder
@@ -14,6 +17,21 @@ class ScoreSeeder extends Seeder
      */
     public function run()
     {
-        Score::factory()->count(100)->create();
+
+        for ($i = 0; $i < 100; $i++) {
+            $scoreRepo = new ScoreRepository(new Score());
+            $scoreService = new ScoreRepository(new Score());
+            $userId = User::all()->random()->id;
+            $payload = [
+                'score' => rand(10, 1000),
+            ];
+            StoreScoreJob::dispatch(
+                $scoreRepo,
+                $userId,
+                $payload,
+//                $this->scoreService
+            );
+        }
+
     }
 }
