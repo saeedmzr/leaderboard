@@ -18,7 +18,7 @@ class ScoreSeeder extends Seeder
     public function run()
     {
 
-        for ($i = 0; $i < 100; $i++) {
+        for ($i = 0; $i < 300; $i++) {
             $scoreRepo = new ScoreRepository(new Score());
             $scoreService = new ScoreRepository(new Score());
             $userId = User::all()->random()->id;
