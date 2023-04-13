@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,7 +16,7 @@ class CreateScoresTable extends Migration
     {
         Schema::create('scores', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(\App\Models\User::class)->constrained();
+            $table->foreignIdFor(User::class)->constrained();
             $table->integer('score');
             $table->timestamps();
             $table->index(['score']);
