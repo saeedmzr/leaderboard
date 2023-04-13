@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Score\StoreScoreRequest;
+use App\Http\Resources\Score\ScoreFromRedisResource;
 use App\Jobs\StoreScoreJob;
 use App\Repositories\Score\ScoreRepository;
 use App\Services\ScoreService;
@@ -14,8 +15,9 @@ class ScoreController extends Controller
 
     public function __construct(
         private ScoreRepository $scoreRepository,
-        private ScoreService $scoreService,
-    ) {
+        private ScoreService    $scoreService
+    )
+    {
     }
 
     public function store(StoreScoreRequest $request)
@@ -34,7 +36,8 @@ class ScoreController extends Controller
     public function getTopList()
     {
         $scores = $this->scoreService->getTopList();
-        return response()->json($scores);
+        $scores = $this->generateScoreFromRedis($scores);
+        return ScoreFromRedisResource::collection($scores);
     }
 
     /**
@@ -43,7 +46,8 @@ class ScoreController extends Controller
     public function getScoresAroundUser(Request $request)
     {
         $scores = $this->scoreService->getAround($request->user()->id, 5);
-        return response()->json($scores);
+        $scores = $this->generateScoreFromRedis($scores);
+        return ScoreFromRedisResource::collection($scores);
     }
 
 }
