@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+    #MYSQL
+    database:
+        container_name: ${APP_NAME}-mysql8
+        ulimits:
+            nofile:
+                soft: 65536
+                hard: 65536
+        image: mysql:8.0.25
+        command: mysqld --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+        restart: unless-stopped
+        tty: true
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+            MYSQL_TCP_PORT: ${DB_PORT}
+        ports:
+            - '${DB_PORT}:${DB_PORT}'
+        security_opt:
+            - seccomp:unconfined
+        deploy:
+            resources:
+                limits:
+                    memory: "600M"
+        volumes:
+            - './docker/mysql/data:/var/lib/mysql'
+            - './docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf'
+            - './docker/mysql/sql:/docker-entrypoint-initdb.d'
+    #NGINX
+    web-server:
+        image: nginx:latest
+        container_name: ${APP_NAME}-nginx
+        ports:
+            - '${APP_PORT-8080}:8080'
+        volumes:
+            - ./:/var/www/html
+            - ./docker/nginx/panel.conf:/etc/nginx/conf.d/panel.conf
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+    redis:
+        image: redis:latest
+        container_name: ${APP_NAME}-redis
+        ports:
+            - '${REDIS_PORT-8080}:8080'
+    php:
+        build:
+            context: docker/php
+        restart: always
+        container_name: ${APP_NAME}-php
+        user: "${USER_ID-1000}:${USER_ID-1000}"
+        volumes:
+            - ./:/var/www/html
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
