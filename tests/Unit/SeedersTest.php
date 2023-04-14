@@ -15,15 +15,15 @@ class SeedersTest extends TestCase
      *
      * @return void
      */
-    public function test_users_seeder()
+    public function test_users_factory()
     {
-        $this->seed(UserSeeder::class);
-        $this->assertEquals(2002, User::all()->count());
+        $testingUser = User::factory()->create();
+        $this->assertModelExists($testingUser);
     }
 
-    public function test_scores_seeder()
+    public function test_scores_factory()
     {
-        $this->seed(ScoreSeeder::class);
-        $this->assertEquals(601, Score::all()->count());
+        $testingScore = Score::factory()->create();
+        $this->assertModelExists($testingScore);
     }
 }
