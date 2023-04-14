@@ -24,8 +24,7 @@ class StoreScoreJob implements ShouldQueue
     public function __construct(
         private ScoreRepository $scoreRepository,
         private int             $userId,
-        array                   $payload,
-//        private ScoreService    $scoreService,
+        array                   $payload
     )
     {
         $this->payload = $payload;
@@ -46,7 +45,6 @@ class StoreScoreJob implements ShouldQueue
         $payload['user_id'] = $this->userId;
 
         $insertedScore = $this->scoreRepository->create($payload);
-        $userHighestScore = $this->scoreRepository->user($this->userId)->getHighestScore()->first();
 
         if ($insertedScore->score > $redis->zScore('leaderboard', $this->userId)) {
             $redis->zAdd('leaderboard', $insertedScore->score, $this->userId);

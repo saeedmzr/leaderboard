@@ -23,7 +23,7 @@ class ScoreController extends Controller
     public function store(StoreScoreRequest $request)
     {
         $userId = $request->user()->id;
-        StoreScoreJob::dispatch($this->scoreRepository, $userId, $request->validated(), $this->scoreService);
+        StoreScoreJob::dispatch($this->scoreRepository, $userId, $request->validated());
         return response()->json([
             'status' => 'success',
             'message' => 'your score has been stored successfully.'
